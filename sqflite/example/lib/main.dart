@@ -1,12 +1,20 @@
 import 'dart:async';
+import 'dart:ffi';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_example/batch_test_page.dart';
 import 'package:sqflite_example/deprecated_test_page.dart';
 import 'package:sqflite_example/exception_test_page.dart';
 import 'package:sqflite_example/exp_test_page.dart';
 import 'package:sqflite_example/manual_test_page.dart';
 import 'package:sqflite_example/src/dev_utils.dart';
+import 'package:sqlite3/open.dart';
+
+import 'package:sqflite_common/src/mixin/factory.dart';
+import 'package:sqflite_common_ffi/src/method_call.dart';
+import 'package:sqflite_common_ffi/src/sqflite_ffi_impl.dart';
 
 import 'model/main_item.dart';
 import 'open_test_page.dart';
@@ -17,6 +25,13 @@ import 'todo_test_page.dart';
 import 'type_test_page.dart';
 
 void main() {
+  if (Platform.environment.containsKey('TIZEN_API_VERSION')) { // if Tizen
+    open.overrideForAll(() => DynamicLibrary.open('libsqlite3.so.0'));
+    databaseFactory = buildDatabaseFactory(
+        invokeMethod: (String method, [dynamic arguments]) async =>
+            await FfiMethodCall(method, arguments).handleImpl());
+  }
+
   runApp(MyApp());
 }
 

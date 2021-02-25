@@ -288,7 +288,14 @@ extension SqfliteFfiMethodCallHandler on FfiMethodCall {
 
   /// Default database path.
   String getDatabasesPath() {
-    return absolute(join('.dart_tool', 'sqflite_common_ffi', 'databases'));
+    if (Platform.environment.containsKey('TIZEN_API_VERSION')) { // if Tizen
+      var homePath = Platform.environment['HOME'];
+      var packageId = Platform.environment['AUL_PKGID'];
+      var packagePath = join(homePath, 'apps_rw', packageId);
+      return join(packagePath, 'data', 'sqflite_common_ffi', 'databases');
+    } else {
+      return absolute(join('.dart_tool', 'sqflite_common_ffi', 'databases'));
+    }
   }
 
   /// Handle open database.
